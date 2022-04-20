@@ -1,0 +1,14 @@
+syntax = "proto3";
+option go_package = "github.com/zbw0046/vol-demo/grpc";
+
+service backend {
+  rpc WatchUpload(WatchUploadRequest) returns (stream WatchUploadResponse){};
+}
+
+message WatchUploadRequest {
+  string vid = 1;
+}
+
+message WatchUploadResponse {
+  string message = 1;
+}
