@@ -3,6 +3,7 @@ option go_package = "github.com/zbw0046/vol-demo/grpc";
 
 service backend {
   rpc WatchUpload(WatchUploadRequest) returns (stream WatchUploadResponse){};
+  rpc GetVidInfo(GetVidInfoRequest) returns (GetVidInfoResponse){};
 }
 
 message WatchUploadRequest {
@@ -10,5 +11,13 @@ message WatchUploadRequest {
 }
 
 message WatchUploadResponse {
+  string message = 1;
+}
+
+message GetVidInfoRequest {
+  string vid = 1;
+}
+
+message GetVidInfoResponse {
   string message = 1;
 }

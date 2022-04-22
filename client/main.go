@@ -22,7 +22,9 @@ var (
 
 func main() {
 	filePath := ""
-	flag.StringVar(&filePath, "path", "/tmp/1", "upload file path")
+	vid := ""
+	flag.StringVar(&filePath, "upload_path", "", "upload file path")
+	flag.StringVar(&vid, "query_vid", "", "query vid")
 	flag.StringVar(&serverHost, "server", "", "server host")
 	flag.Parse()
 
@@ -34,7 +36,21 @@ func main() {
 	defer conn.Close()
 	gRPCConn = conn
 
+	if vid != "" {
+		QueryVID(vid)
+		return
+	}
 	RunUploadProcess(filePath)
+}
+
+func QueryVID(vid string) {
+	client := pb.NewBackendClient(gRPCConn)
+	ret, err := client.GetVidInfo(context.TODO(), &pb.GetVidInfoRequest{Vid: vid})
+	if err != nil {
+		log.Printf("查询失败：%s", err.Error())
+		return
+	}
+	log.Printf("vid=%s, %s", vid, ret.GetMessage())
 }
 
 func RunUploadProcess(filePath string) {
@@ -62,7 +78,7 @@ func RunUploadProcess(filePath string) {
 			log.Printf("grpc stream error: %s", err.Error())
 			return
 		}
-		log.Printf("GRPC stream return: %s", msg.GetMessage())
+		log.Printf("vid=%s, %s", vid, msg.GetMessage())
 	}
 }
 

@@ -81,10 +81,13 @@ func (v *VolcSDK) UploadFile(filePath string) (vid string, err error) {
 
 	snapShotFunc := functions.SnapshotFunc(1.3)
 	getMetaFunc := functions.GetMetaFunc()
+	workflowFunc := functions.StartWorkflowFunc("06853553c4d3402698a17ff5dff87fd7")
 	funcList := []*vod.Function{
 		&snapShotFunc,
 		&getMetaFunc,
+		&workflowFunc,
 	}
+
 	funcs, _ := sonic.MarshalString(funcList)
 
 	resp, _, err := v.instance.UploadMediaWithCallback(&request.VodUploadMediaRequest{

@@ -23,6 +23,7 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type BackendClient interface {
 	WatchUpload(ctx context.Context, in *WatchUploadRequest, opts ...grpc.CallOption) (Backend_WatchUploadClient, error)
+	GetVidInfo(ctx context.Context, in *GetVidInfoRequest, opts ...grpc.CallOption) (*GetVidInfoResponse, error)
 }
 
 type backendClient struct {
@@ -65,11 +66,21 @@ func (x *backendWatchUploadClient) Recv() (*WatchUploadResponse, error) {
 	return m, nil
 }
 
+func (c *backendClient) GetVidInfo(ctx context.Context, in *GetVidInfoRequest, opts ...grpc.CallOption) (*GetVidInfoResponse, error) {
+	out := new(GetVidInfoResponse)
+	err := c.cc.Invoke(ctx, "/backend/GetVidInfo", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // BackendServer is the server API for Backend service.
 // All implementations must embed UnimplementedBackendServer
 // for forward compatibility
 type BackendServer interface {
 	WatchUpload(*WatchUploadRequest, Backend_WatchUploadServer) error
+	GetVidInfo(context.Context, *GetVidInfoRequest) (*GetVidInfoResponse, error)
 	mustEmbedUnimplementedBackendServer()
 }
 
@@ -79,6 +90,9 @@ type UnimplementedBackendServer struct {
 
 func (UnimplementedBackendServer) WatchUpload(*WatchUploadRequest, Backend_WatchUploadServer) error {
 	return status.Errorf(codes.Unimplemented, "method WatchUpload not implemented")
+}
+func (UnimplementedBackendServer) GetVidInfo(context.Context, *GetVidInfoRequest) (*GetVidInfoResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetVidInfo not implemented")
 }
 func (UnimplementedBackendServer) mustEmbedUnimplementedBackendServer() {}
 
@@ -114,13 +128,36 @@ func (x *backendWatchUploadServer) Send(m *WatchUploadResponse) error {
 	return x.ServerStream.SendMsg(m)
 }
 
+func _Backend_GetVidInfo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetVidInfoRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BackendServer).GetVidInfo(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/backend/GetVidInfo",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BackendServer).GetVidInfo(ctx, req.(*GetVidInfoRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Backend_ServiceDesc is the grpc.ServiceDesc for Backend service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var Backend_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "backend",
 	HandlerType: (*BackendServer)(nil),
-	Methods:     []grpc.MethodDesc{},
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "GetVidInfo",
+			Handler:    _Backend_GetVidInfo_Handler,
+		},
+	},
 	Streams: []grpc.StreamDesc{
 		{
 			StreamName:    "WatchUpload",

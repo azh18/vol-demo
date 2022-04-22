@@ -17,6 +17,7 @@ type Service interface {
 	OnUploadSuccess(vid string, info interface{})
 	OnTranscodeFinish(vid string, info interface{})
 	Watch(vid string) (Watcher, error)
+	GetVidInfo(vid string) (string, error)
 	DAL() DAL
 }
 
@@ -114,6 +115,14 @@ func (s *ServiceImpl) Watch(vid string) (Watcher, error) {
 	}
 	s.watchers.PushBack(w)
 	return w, nil
+}
+
+func (s *ServiceImpl) GetVidInfo(vid string) (string, error) {
+	v, err := s.db.Get(vid)
+	if err != nil {
+		return "", err
+	}
+	return makeMessage(v), nil
 }
 
 func (s *ServiceImpl) DAL() DAL {

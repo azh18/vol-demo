@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/bytedance/sonic"
@@ -35,6 +36,15 @@ func (b *backendServer) WatchUpload(request *pb.WatchUploadRequest, server pb.Ba
 		}
 	}
 	return nil
+}
+
+func (b *backendServer) GetVidInfo(ctx context.Context, req *pb.GetVidInfoRequest) (*pb.GetVidInfoResponse, error) {
+	vid := req.GetVid()
+	ret, err := GetService().GetVidInfo(vid)
+	if err != nil {
+		return nil, err
+	}
+	return &pb.GetVidInfoResponse{Message: ret}, nil
 }
 
 func invokeUpload(writer http.ResponseWriter, request *http.Request) {
@@ -96,6 +106,7 @@ func callbackHandler(writer http.ResponseWriter, request *http.Request) {
 		log.Printf("read body error: %s", err.Error())
 		return
 	}
+	log.Printf("callback: %s", body)
 
 	if err := sonic.Unmarshal(body, event); err != nil {
 		errStr := fmt.Sprintf("unmarshal request to event error: %s", err.Error())
