@@ -75,7 +75,7 @@ func (w *watcherImpl) flushFromDAL() error {
 
 	if !w.closed && result.LastUpdate.After(w.messageLastUpdate) {
 		w.messageChan <- makeMessage(result)
-		result.LastUpdate = w.messageLastUpdate
+		w.messageLastUpdate = result.LastUpdate
 	}
 	return nil
 }
